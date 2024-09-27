@@ -7,20 +7,20 @@ Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/r
 $${\color{green}[x]}$$ Player movement<br>
 $${\color{green}[x]}$$ Wall collision<br>
 $${\color{green}[x]}$$ Reading a map from a text file<br>
-$${\color{red}[ \space \color{red}]}$$ Connecting multiple maps<br>
-- [x] Raycasting the walls<br>
-- [x] Loading images to textures and using it to give textures to the walls<br>
-- [ ] Better wrapper for scene objects connected to images<br>
-- [ ] Raycasting the floors and ceilings<br>
-- [ ] Add light sources<br>
-- [ ] Depth-buffering<br>
-- [ ] Add interactible objects<br>
-- [ ] Add a player inventory<br>
-- [ ] Add a hotbar and render what the player is holding<br>
-- [ ] Improving player movement<br>
-- [ ] Add enemies<br>
-- [ ] Add animated textures support<br>
+$${\color{red}[_]}$$ Connecting multiple maps<br>
+$${\color{green}[x]}$$ Raycasting the walls<br>
+$${\color{green}[x]}$$ Loading images to textures and using it to give textures to the walls<br>
+$${\color{red}[_]}$$ Better wrapper for scene objects connected to images<br>
+$${\color{red}[_]}$$ Raycasting the floors and ceilings<br>
+$${\color{red}[_]}$$ Add light sources<br>
+$${\color{red}[_]}$$ Depth-buffering<br>
+$${\color{red}[_]}$$ Add interactible objects<br>
+$${\color{red}[_]}$$ Add a player inventory<br>
+$${\color{red}[_]}$$ Add a hotbar and render what the player is holding<br>
+$${\color{red}[_]}$$ Improving player movement<br>
+$${\color{red}[_]}$$ Add enemies<br>
+$${\color{red}[_]}$$ Add animated textures support<br>
 
 This project uses SDL2 and SDL2_image libraries. All dependecies are included in the repository.<br>
-It uses C++20 and uses mingw64 compiler. To compile and run just run a command **make** (or **mingw32_make**) and run it with **.\main**. <br>
+It uses C++20 and uses mingw64 compiler. To compile and run just run a command 'make' (or 'mingw32_make') and run it with '.\main'. <br>
 Project is made for Windows but should be able to run fine with Linux.<br>
