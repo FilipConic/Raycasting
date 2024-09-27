@@ -2,7 +2,7 @@
 
 #include "Scene.h"
 #include <SDL2/SDL_image.h>
-#include <vector>
+#include <initializer_list>
 
 struct Image {
     SDL_Texture* texture;
@@ -21,11 +21,11 @@ class ImageLoader {
     ImageLoader(const ImageLoader&) = delete;
 public:
     ImageLoader(const Scene& _scene);
-    ImageLoader(const Scene& _scene, const std::vector<std::string>& image_paths);
+    ImageLoader(const Scene& _scene, const std::initializer_list<std::string>& image_paths);
     ~ImageLoader();
 
     void load_image(std::string image_path);
-    void load_images(const std::vector<std::string>& image_paths);
+    void load_images(const std::initializer_list<std::string>& image_paths);
     const Image& get_image(int value) const;
     const Image& get_image(const std::string& name) const;
     void draw_image(int value, const SDL_Rect& source_rect, const SDL_Rect& destination_rect) const;

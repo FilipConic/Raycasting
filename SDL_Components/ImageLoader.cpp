@@ -12,7 +12,7 @@ ImageLoader::ImageLoader(const Scene& _scene) : scene(_scene), images(nullptr), 
     int result = IMG_Init(IMG_INIT_PNG);
     assertm(result & IMG_INIT_PNG, "Unable to initialize PNG loading!\n");
 }
-ImageLoader::ImageLoader(const Scene& _scene, const vector<string>& image_paths) : scene(_scene), images(nullptr), num_images(0) {
+ImageLoader::ImageLoader(const Scene& _scene, const initializer_list<string>& image_paths) : scene(_scene), images(nullptr), num_images(0) {
     int result = IMG_Init(IMG_INIT_PNG);
     assertm(result & IMG_INIT_PNG, "Unable to initialize PNG loading!\n");
     load_images(image_paths);
@@ -45,7 +45,7 @@ void ImageLoader::load_image(string image_path) {
 
     SDL_FreeSurface(surface);
 }
-void ImageLoader::load_images(const vector<string>& image_paths){
+void ImageLoader::load_images(const initializer_list<string>& image_paths){
     SDL_Surface* surface;
     SDL_Texture* new_texture;
 
