@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     ImageLoader il(s, {".\\images\\glitch_texture.png", ".\\images\\bricks.png", ".\\images\\gravel.png"});
     
     Map map(s, "map.txt");
-    Player p(s, il, map, 7, 7, 1600);
+    Player p(s, il, map, 9, 7, 800);
 
     SDL_Event e;
     bool game_running = true, draw_map = true;
