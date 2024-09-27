@@ -19,15 +19,15 @@ int main(int argc, char** argv) {
 
     ImageLoader il(s, {".\\images\\glitch_texture.png", ".\\images\\bricks.png", ".\\images\\gravel.png"});
     
+    Vec2<int> translation = {50, 50};
     Map map(s, "map.txt");
     Player p(s, il, map, 9, 7, 800);
 
     SDL_Event e;
-    bool game_running = true, draw_map = true;
     Uint64 last_ticks, time_passed = SDL_GetTicks64();
     float dt;
     
-    Vec2<int> translation = {50, 50};
+    bool game_running = true, draw_map = true;
     while (game_running) {
         last_ticks = SDL_GetTicks64();
         dt = (last_ticks - time_passed) / 1e3f;
