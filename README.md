@@ -1,18 +1,13 @@
 # Raycasting
-<style>
-r {color : Red}
-g {color : Green}
-</style>
-
 
 This project is inspired by Tsoding's series on **Raycasting in TypeScript** on youtube: *https://www.youtube.com/watch?v=K1xEkA46CuM&list=PLpM-Dvs8t0VZ08cYW6yqNTWLKqLssw0nm&pp=iAQB* <br>
 Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/raycasting.html*<br>
 
 **Implemented and planned to implement:** <br>
-<g>[x]</g> Player movement<br>
+$${\color{green}[x]}$$ Player movement<br>
 - [x] Wall collision<br>
 - [x] Reading a map from a text file<br>
-<r>[ ]</r> Connecting multiple maps<br>
+[ ] Connecting multiple maps<br>
 - [x] Raycasting the walls<br>
 - [x] Loading images to textures and using it to give textures to the walls<br>
 - [ ] Better wrapper for scene objects connected to images<br>
