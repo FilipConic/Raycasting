@@ -1,3 +1,8 @@
-.\src\include\*.h linguist-language=C
-.\SDL_Components\*.h linguist-language=C++
-.\*.h linguist-language=C++
+Player.h linguist-language=C++
+Scene.h linguist-language=C++
+Keyboard.h linguist-language=C++
+ImageLoader.h linguist-language=C++
+Color.h linguist-language=C++
+Mouse.h linguist-language=C++
+Vec2.h linguist-language=C++
+*.h linguist-language=C
