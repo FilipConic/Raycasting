@@ -7,7 +7,7 @@ Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/r
 $${\color{green}[x]}$$ Player movement<br>
 $${\color{green}[x]}$$ Wall collision<br>
 $${\color{green}[x]}$$ Reading a map from a text file<br>
-$${\color{red}[ \space ]}$$ Connecting multiple maps<br>
+$${\color{red}[ \space \color{red}]}$$ Connecting multiple maps<br>
 - [x] Raycasting the walls<br>
 - [x] Loading images to textures and using it to give textures to the walls<br>
 - [ ] Better wrapper for scene objects connected to images<br>
