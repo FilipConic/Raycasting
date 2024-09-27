@@ -4,12 +4,12 @@ This project is inspired by Tsoding's series on **Raycasting in TypeScript** on 
 Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/raycasting.html*<br>
 
 **Implemented and planned to implement:** <br>
-$${\color{green}[x]}$$ Player movement<br>
-$${\color{green}[x]}$$ Wall collision<br>
-$${\color{green}[x]}$$ Reading a map from a text file<br>
+$${\color{green}[ X ]}$$ Player movement<br>
+$${\color{green}[ X ]}$$ Wall collision<br>
+$${\color{green}[ X ]}$$ Reading a map from a text file<br>
 $${\color{red}[-]}$$ Connecting multiple maps<br>
-$${\color{green}[x]}$$ Raycasting the walls<br>
-$${\color{green}[x]}$$ Loading images to textures and using it to give textures to the walls<br>
+$${\color{green}[ X ]}$$ Raycasting the walls<br>
+$${\color{green}[ X ]}$$ Loading images to textures and using it to give textures to the walls<br>
 $${\color{red}[-]}$$ Better wrapper for scene objects connected to images<br>
 $${\color{red}[-]}$$ Raycasting the floors and ceilings<br>
 $${\color{red}[-]}$$ Add light sources<br>
@@ -21,6 +21,6 @@ $${\color{red}[-]}$$ Improving player movement<br>
 $${\color{red}[-]}$$ Add enemies<br>
 $${\color{red}[-]}$$ Add animated textures support<br>
 
-This project uses SDL2 and SDL2_image libraries. All dependecies are included in the repository.<br>
-It uses C++20 and uses mingw64 compiler. To compile and run just run a command 'make' (or 'mingw32_make') and run it with '.\main'. <br>
+This project uses *SDL2* and *SDL2_image* libraries. All dependecies are included in the repository.<br>
+It uses *C++20* and uses mingw64 compiler. To compile and run just run a command ***make*** (or ***mingw32_make***) and run it with ***.\main***. <br>
 Project is made for Windows but should be able to run fine with Linux.<br>
