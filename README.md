@@ -6,7 +6,7 @@ Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/r
 **Implemented and planned to implement:** <br>
 $${\color{green}[ X ]}$$ Player movement<br>
 $${\color{green}[ X ]}$$ Wall collision<br>
-$${\color{green}[ X ]}$$ Reading a map from a text file<br>
+$${\color{green}[ \space X \space ]}$$ Reading a map from a text file<br>
 $${\color{red}[-]}$$ Connecting multiple maps<br>
 $${\color{green}[ X ]}$$ Raycasting the walls<br>
 $${\color{green}[ X ]}$$ Loading images to textures and using it to give textures to the walls<br>
