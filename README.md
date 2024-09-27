@@ -1,6 +1,6 @@
 # Raycasting
 
-This project is inspired by Tsoding's series on **Raycasting in TypeScript** on youtube: *https://www.youtube.com/watch?v=K1xEkA46CuM&list=PLpM-Dvs8t0VZ08cYW6yqNTWLKqLssw0nm&pp=iAQB* <br>
+This project is inspired by Tsoding's series on **Raycasting in TypeScript** on youtube: *https://tinyurl.com/47k396hf* <br>
 Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/raycasting.html*<br>
 
 **Implemented and planned to implement:** <br>
