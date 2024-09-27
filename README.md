@@ -5,7 +5,7 @@ This project is inspired by Tsoding's series on **Raycasting in TypeScript** on 
 Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/raycasting.html*
 
 **Implemented and planned to implement:** <br>
-<span style = "color:green">[x]</span> Player movement
+<span style="color:green">[x]</span> Player movement
 - [x] Wall collision
 - [x] Reading a map from a text file
 - [ ] Connecting multiple maps
