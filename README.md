@@ -5,9 +5,9 @@ Also follows **Lode's Computer Graphics Tutorial**: *https://lodev.org/cgtutor/r
 
 **Implemented and planned to implement:** <br>
 $${\color{green}[x]}$$ Player movement<br>
-- [x] Wall collision<br>
-- [x] Reading a map from a text file<br>
-[ ] Connecting multiple maps<br>
+$${\color{green}[x]}$$ Wall collision<br>
+$${\color{green}[x]}$$ Reading a map from a text file<br>
+$${\color{red}[ \space ]}$$ Connecting multiple maps<br>
 - [x] Raycasting the walls<br>
 - [x] Loading images to textures and using it to give textures to the walls<br>
 - [ ] Better wrapper for scene objects connected to images<br>
