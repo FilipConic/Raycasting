@@ -1,2 +1,3 @@
-*.h linguist-language=C++
-src\include\*.h linguist-language=C
+.\SDL_Components\*.h linguist-language=C++
+.\*.h linguist-language=C++
+.\src\include\*.h linguist-language=C
