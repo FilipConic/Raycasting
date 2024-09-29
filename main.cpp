@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     
     Vec2<int> translation = {50, 50};
     Map map(s, "map.txt");
-    Player p(s, il, map, 9, 7, 800);
+    Player p(s, il, map, 9.5f, 6.5f, 1600);
 
     SDL_Event e;
     Uint64 last_ticks, time_passed = SDL_GetTicks64();

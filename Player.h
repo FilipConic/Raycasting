@@ -61,7 +61,6 @@ class Player {
     const float TURN_SPEED = 1.5f;
 
     inline void calculate_beginning_rays();
-    void calculate_rays();
 
     Player() = delete;
     Player(const Player&) = delete;
@@ -72,5 +71,6 @@ public:
 
     void move(float dt, const Keyboard& keyboard);
     void draw(const Vec2<int>& translation_vec = {0, 0});
+    void calculate_rays();
     void draw_walls();
 };

@@ -8,6 +8,8 @@ struct Color {
 
     Color& operator*=(float x);
 };
+Color operator*(const Color& clr, float val);
+Color operator*(float val, const Color& clr);
 
 const Color BLACK      = {  0,   0,   0};
 const Color DARK_GRAY  = { 51,  51,  51};

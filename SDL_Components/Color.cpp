@@ -9,3 +9,13 @@ Color& Color::operator*=(float x) {
     b *= x;
     return *this;
 }
+Color operator*(const Color& clr, float val) {
+    val = (val > 1 ? 1 : (val < 0 ? 0 : val));
+    Color result(clr.r * val, clr.g * val, clr.b * val, clr.a);
+    return result;
+}
+Color operator*(float val, const Color& clr) {
+    val = (val > 1 ? 1 : (val < 0 ? 0 : val));
+    Color result(clr.r * val, clr.g * val, clr.b * val, clr.a);
+    return result;
+}
