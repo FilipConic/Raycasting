@@ -153,7 +153,7 @@ void Player::calculate_rays() {
     char x_side, y_side;
     Map::MapElement hit_color;
 
-    auto new_calculate_one_ray = [&](Ray& ray) -> void {
+    auto calculate_one_ray = [&](Ray& ray) -> void {
         dy = abs(ray.hit_point.x) > 1e-5 ? ray.hit_point.y / ray.hit_point.x : 1e6;
         dx = abs(ray.hit_point.y) > 1e-5 ? ray.hit_point.x / ray.hit_point.y : 1e6;
 
@@ -228,93 +228,8 @@ void Player::calculate_rays() {
         ray.element = hit_color;
     };
 
-    auto calculate_one_ray = [&](Ray& ray) -> void {
-        dy = abs(ray.hit_point.x) > 1e-5 ? ray.hit_point.y / ray.hit_point.x : 1e6;
-        dx = abs(ray.hit_point.y) > 1e-5 ? ray.hit_point.x / ray.hit_point.y : 1e6;
-
-        curr = pos;
-        curr_is_x = true;
-        off_the_map = false;
-        hit_color = Map::M_NONE;
-
-        auto set_curr = [&]() -> void {
-            if ((hit_x - pos).magnitude_squared() < (hit_y - pos).magnitude_squared()) {
-                curr = hit_x;
-                curr_is_x = true;
-            } else {
-                curr = hit_y;
-                curr_is_x = false;
-            }
-
-            if (curr_is_x) {
-                if (abs(curr.x - map.width) < 1e-3 || abs(curr.x) < 1e-3) off_the_map = true;
-            } else {
-                if (abs(curr.y - map.height) < 1e-3 || abs(curr.y) < 1e-3) off_the_map = true;
-            }
-        };
-
-        if (ray.hit_point.x >= 0 && ray.hit_point.y >= 0) {
-            do {
-                hit_x.x = floor(curr.x) + 1;
-                hit_x.y = curr.y + (hit_x.x - curr.x) * dy;
-
-                hit_y.y = floor(curr.y) + 1;
-                hit_y.x = curr.x + (hit_y.y - curr.y) * dx;
-                
-                set_curr();
-                if (off_the_map) { hit_color = Map::M_NONE; break; }
-
-                hit_color = map.cells[(int)(curr.x) + (int)(curr.y) * map.width];
-            } while (!hit_color);
-        } else if (ray.hit_point.x < 0 && ray.hit_point.y >= 0) {
-           do {
-                hit_x.x = ceil(curr.x) - 1;
-                hit_x.y = curr.y + (hit_x.x - curr.x) * dy;
-
-                hit_y.y = floor(curr.y) + 1;
-                hit_y.x = curr.x + (hit_y.y - curr.y) * dx;
-
-                set_curr();
-                if (off_the_map) { hit_color = Map::M_NONE; break; }
-
-                if (curr_is_x) hit_color = map.cells[(int)(curr.x - 1) + (int)(curr.y) * map.width];
-                else           hit_color = map.cells[(int)(curr.x)     + (int)(curr.y) * map.width];  
-            } while (!hit_color);
-        } else if (ray.hit_point.x >= 0 && ray.hit_point.y < 0) {
-            do {
-                hit_x.x = floor(curr.x) + 1;
-                hit_x.y = curr.y + (hit_x.x - curr.x) * dy;
-
-                hit_y.y = ceil(curr.y) - 1;
-                hit_y.x = curr.x + (hit_y.y - curr.y) * dx;
-            
-                set_curr();
-                if (off_the_map) { hit_color = Map::M_NONE; break; }
-
-                if (curr_is_x) hit_color = map.cells[(int)(curr.x) + (int)(curr.y)     * map.width];
-                else           hit_color = map.cells[(int)(curr.x) + (int)(curr.y - 1) * map.width];
-            } while (!hit_color);
-        } else {
-            do {
-                hit_x.x = ceil(curr.x) - 1;
-                hit_x.y = curr.y + (hit_x.x - curr.x) * dy;
-
-                hit_y.y = ceil(curr.y) - 1;
-                hit_y.x = curr.x + (hit_y.y - curr.y) * dx;
-
-                set_curr();
-                if (off_the_map) { hit_color = Map::M_NONE; break; }
-
-                if (curr_is_x) hit_color = map.cells[(int)(curr.x - 1) + (int)(curr.y)     * map.width];
-                else           hit_color = map.cells[(int)(curr.x)     + (int)(curr.y - 1) * map.width];
-            } while (!hit_color);
-        }
-        ray.in_block_pos = curr_is_x ? hit_x.y - floor(hit_x.y) : hit_y.x - floor(hit_y.x); 
-        ray.hit_point = curr_is_x ? hit_x - pos : hit_y - pos;
-        ray.element = hit_color;
-    };
     for (int i = 0; i < ray_num; ++i)
-        new_calculate_one_ray(ray_array[i]);
+        calculate_one_ray(ray_array[i]);
 }
 void Player::move(float dt, const Keyboard& keyboard) {
     Vec2<float> movement_vec{0.f, 0.f};
