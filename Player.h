@@ -21,7 +21,8 @@ struct Map {
         M_ORANGE,
         M_PINK,
         M_BRICK = 64,
-        M_GRAVEL
+        M_GRAVEL,
+        M_COBBLE
     };
 
     const Scene& scene;
@@ -48,19 +49,16 @@ class Player {
     float FOV;
     Vec2<float> n;
 
+    int ray_num;
     struct Ray {
         Vec2<float> hit_point;
         float in_block_pos;
         Map::MapElement element;
     };
-    int ray_num;
-    Ray* ray_array;
 
     const float SIZE = .45f;
     const float SPEED = 5.f;
     const float TURN_SPEED = 1.5f;
-
-    inline void calculate_beginning_rays();
 
     Player() = delete;
     Player(const Player&) = delete;
@@ -71,6 +69,5 @@ public:
 
     void move(float dt, const Keyboard& keyboard);
     void draw(const Vec2<int>& translation_vec = {0, 0});
-    void calculate_rays();
     void draw_walls();
 };

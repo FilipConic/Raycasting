@@ -17,11 +17,16 @@ int main(int argc, char** argv) {
     Keyboard k;
     Mouse m;
 
-    ImageLoader il(s, {".\\images\\glitch_texture.png", ".\\images\\bricks.png", ".\\images\\gravel.png"});
+    ImageLoader il(s, {
+    ".\\images\\glitch_texture.png",
+    ".\\images\\bricks.png",
+    ".\\images\\gravel.png",
+    ".\\images\\cobble_path.png"
+    });
     
     Vec2<int> translation = {50, 50};
     Map map(s, "map.txt");
-    Player p(s, il, map, 9.5f, 6.5f, 1600);
+    Player p(s, il, map, 9.5f, 6.5f, 1600, 80);
 
     SDL_Event e;
     Uint64 last_ticks, time_passed = SDL_GetTicks64();
