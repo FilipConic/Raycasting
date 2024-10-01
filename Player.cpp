@@ -34,10 +34,10 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
 
     float speed = SPEED * dt;
     if (keyboard[SDL_SCANCODE_LCTRL]) speed *= 1.5f;
-    if (keyboard[SDL_SCANCODE_W])   movement_vec +=  n * speed;
-    if (keyboard[SDL_SCANCODE_S])   movement_vec -=  n * speed;
-    if (keyboard[SDL_SCANCODE_D]) { movement_vec += (n * speed).rotate90(); }
-    if (keyboard[SDL_SCANCODE_A]) { movement_vec -= (n * speed).rotate90(); }
+    if (keyboard[SDL_SCANCODE_W])   movement_vec +=  n;
+    if (keyboard[SDL_SCANCODE_S])   movement_vec -=  n;
+    if (keyboard[SDL_SCANCODE_D]) { movement_vec += (n * 1).rotate90(); }
+    if (keyboard[SDL_SCANCODE_A]) { movement_vec -= (n * 1).rotate90(); }
 
     int scene_width = scene.get_width() / 2;
     int diff = scene_width - mouse.pos.x;
@@ -55,6 +55,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
     else if (curr_angle < 0) curr_angle += DOUBLE_PI;
     
     /////////////// cut of movement ///////////////
+    if (abs(movement_vec.x) > 1e-2 && abs(movement_vec.y) > 1e-2) movement_vec.normalize() *= speed;
     Vec2<float> new_pos(pos + movement_vec);
     if (new_pos.x > map.width)  new_pos.x = map.width;
     else if (new_pos.x < 0)     new_pos.x = 0;
