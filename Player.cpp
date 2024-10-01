@@ -29,34 +29,44 @@ Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map&
 }
 Player::~Player() { SDL_DestroyTexture(ceiling_floor_texture); }
 
-void Player::move(float dt, const Keyboard& keyboard) {
+void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
     Vec2<float> movement_vec{0.f, 0.f};
 
     float speed = SPEED * dt;
-    if (keyboard[SDL_SCANCODE_LCTRL])
-        speed *= 1.75f;
-    if (keyboard[SDL_SCANCODE_W])
-        movement_vec += n * speed;
-    if (keyboard[SDL_SCANCODE_S])
-        movement_vec -= n * speed;
-    if (keyboard[SDL_SCANCODE_D])
-        curr_angle += TURN_SPEED * dt;
-    if (keyboard[SDL_SCANCODE_A])
-        curr_angle -= TURN_SPEED * dt;
-    if      (curr_angle > DOUBLE_PI) curr_angle = 0;
-    else if (curr_angle < 0) curr_angle = DOUBLE_PI;
+    if (keyboard[SDL_SCANCODE_LCTRL]) speed *= 1.5f;
+    if (keyboard[SDL_SCANCODE_W])   movement_vec +=  n * speed;
+    if (keyboard[SDL_SCANCODE_S])   movement_vec -=  n * speed;
+    if (keyboard[SDL_SCANCODE_D]) { movement_vec += (n * speed).rotate90(); }
+    if (keyboard[SDL_SCANCODE_A]) { movement_vec -= (n * speed).rotate90(); }
+
+    int scene_width = scene.get_width() / 2;
+    int diff = scene_width - mouse.pos.x;
+    auto interpolation = [&](float t) -> float {
+        float y = 1 / (1 + exp(3 - 3 * t));
+        return y * mouse.pos.x + (1 - y) * scene_width;
+    };
+    if (abs(diff) >= 15) {
+        float mouse_movement = interpolation(1e-6f * abs(diff));
+        mouse.set_pos(mouse_movement, scene_width);
+        curr_angle += (mouse_movement - scene_width) / SIZE * 9e-3f;
+    }
+
+    if      (curr_angle > DOUBLE_PI) curr_angle -= DOUBLE_PI;
+    else if (curr_angle < 0) curr_angle += DOUBLE_PI;
     
     /////////////// cut of movement ///////////////
     Vec2<float> new_pos(pos + movement_vec);
-    new_pos.x = max(min(new_pos.x, (float)map.width), 0.f);
-    new_pos.y = max(min(new_pos.y, (float)map.height), 0.f);
+    if (new_pos.x > map.width)  new_pos.x = map.width;
+    else if (new_pos.x < 0)     new_pos.x = 0;
+    if (new_pos.y > map.height) new_pos.y = map.height;
+    else if (new_pos.y < 0)     new_pos.y = 0;
     Vec2<int> new_pos_int(new_pos);
     Vec2<int> top_left    {(int)(pos.x - SIZE), (int)(pos.y - SIZE)};
-    top_left.x = max(top_left.x, 0);
-    top_left.y = max(top_left.y, 0);
+    if (top_left.x < 0) top_left.x = 0;
+    if (top_left.y < 0) top_left.y = 0;
     Vec2<int> bottom_right{(int)(pos.x + SIZE), (int)(pos.y + SIZE)};
-    bottom_right.x = min(bottom_right.x, map.width);
-    bottom_right.y = min(bottom_right.y, map.height);
+    if (bottom_right.x > map.width) bottom_right.x = map.width;
+    if (bottom_right.y > map.height) bottom_right.y = map.height;
 
     auto magn = [](float x, float y) -> float { return x * x + y * y; };
     float size_squared = SIZE * SIZE - 0.05f;
@@ -208,7 +218,6 @@ void Player::draw_walls() {
     Image img;
     unsigned char alpha;
 
-    n = angle_to_vec(curr_angle);
     Vec2<float> between_rays = (angle_to_vec(curr_angle + HALF_PI) * (2.f * sin(FOV / 2.f) * SIZE / (ray_num - 1)));
     Ray curr_ray;
     Vec2<float> begin_vec;
@@ -264,7 +273,7 @@ void Player::draw_walls() {
     }
 }
 void Player::draw_floor_and_ceiling() {
-    auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(8.5f - x))); };
+    auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(9.f - x))); };
     auto brightness_fall_off = [](float x) -> float { return -x / 20.f + 1.f; };
 
     Image img = images.get_image(3);
@@ -276,8 +285,8 @@ void Player::draw_floor_and_ceiling() {
     int img_x, img_y;
     float curr_len = 1;
 
-    Vec2<float> right = angle_to_vec(curr_angle - FOV / 2.f);
-    Vec2<float> left  = angle_to_vec(curr_angle + FOV / 2.f);
+    Vec2<float> right = angle_to_vec(curr_angle + FOV / 2.f);
+    Vec2<float> left  = angle_to_vec(curr_angle - FOV / 2.f);
     Vec2<float> vec, curr_left, curr_right;
 
     int pitch;
@@ -293,33 +302,48 @@ void Player::draw_floor_and_ceiling() {
 
     Uint32 color;
 
+    bool repeat = false;
+
     int j_floor = (height - 1) * width;
     for (int j_ceil = 0; j_ceil <= end;) {
-        curr_len   = tan(a += angle_inc);
-        curr_left  = left  * curr_len + pos;
-        curr_right = right * curr_len + pos;
+        if (repeat) {
+            a += angle_inc;
+            memcpy(&(pixels[j_ceil ]), &(pixels[j_ceil  - width]), pitch);
+            memcpy(&(pixels[j_floor]), &(pixels[j_floor + width]), pitch);
+        } else {
+            curr_len   = tan(a += angle_inc);
+            curr_left  = left  * curr_len + pos;
+            curr_right = right * curr_len + pos;
 
-        for (int i = 0; i < width; i += set_size) {
-            vec = lerp(curr_left, curr_right, (float)i / (width - 1.f));
-            if (vec.x < 0 || vec.x >= map.width || vec.y < 0 || vec.y >= map.height) continue;
+            for (int i = 0; i < width; i += set_size) {
+                vec = lerp(curr_right, curr_left, (float)i / (width - 1.f));
+                if (vec.x < 0 || vec.x >= map.width || vec.y < 0 || vec.y >= map.height) continue;
 
-            img_x = img.width  * (vec.x - (int)(vec.x));
-            img_y = img.height * (vec.y - (int)(vec.y));
+                img_x = img.width  * (vec.x - (int)(vec.x));
+                img_y = img.height * (vec.y - (int)(vec.y));
 
-            color = img_pixels[img_x + img_y * img.width];
-            set_rgba_alpha(color, visibility_fall_off(curr_len));
-            multiply_value_rgba(color, brightness_fall_off(curr_len));
-            for (int k = 0; k < set_size; ++k) {
-                pixels[i + k + j_floor] = color;
-                pixels[i + k + j_ceil]  = color;
+                color = img_pixels[img_x + img_y * img.width];
+                set_rgba_alpha(color, visibility_fall_off(curr_len));
+                multiply_value_rgba(color, brightness_fall_off(curr_len));
+                for (int k = 0; k < set_size; ++k) {
+                    pixels[i + k + j_floor] = color;
+                    pixels[i + k + j_ceil]  = color;
+                }
             }
         }
         j_ceil += width;
         j_floor -= width;
+        repeat = !repeat;
     }
 
     SDL_UnlockTexture(ceiling_floor_texture);
     SDL_RenderCopy(scene, ceiling_floor_texture, NULL, NULL);
+}
+
+void Player::update() {
+    n = angle_to_vec(curr_angle);
+    draw_floor_and_ceiling();
+    draw_walls();
 }
 
 Uint32 color_to_rgba(const Color& color)  {

@@ -34,10 +34,11 @@ public:
     Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int ray_num = 100, int FOV = 90);
     ~Player();
 
-    void move(float dt, const Keyboard& keyboard);
+    void move(float dt, const Keyboard& keyboard, Mouse& mouse);
     void draw(const Vec2<int>& translation_vec = {0, 0});
     void draw_walls();
     void draw_floor_and_ceiling();
+    void update();
 };
 
 Uint32 color_to_rgba(const Color& color);

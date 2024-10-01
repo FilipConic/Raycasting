@@ -36,9 +36,8 @@ int main(int argc, char** argv) {
         k.update();
         m.update();
 
-        p.move(dt, k);
-        p.draw_floor_and_ceiling();
-        p.draw_walls();
+        p.update();
+        p.move(dt, k, m);
 
         if (draw_map) {
             map.draw(250, translation);
