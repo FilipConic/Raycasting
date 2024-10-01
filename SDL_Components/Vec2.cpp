@@ -127,6 +127,12 @@ Vec2<T>::operator Vec2<float>() {
     return {(float)x, (float)y};
 }
 
+template<Number T>
+Vec2<T>& Vec2<T>::map(FtoF f) {
+    x = f(x); y = f(y);
+    return *this;
+}
+
 template<Number T1, Number T2>
 Vec2<T1> operator+(const Vec2<T1>& vec1, const Vec2<T2>& vec2) {
     return {(T1)(vec1.x + vec2.x), (T1)(vec1.y + vec2.y)};
@@ -181,6 +187,15 @@ template Vec2<int> operator/(const Vec2<int>& vec, int);
 template Vec2<float> operator/(const Vec2<int>& vec, float);
 template Vec2<int> operator/(const Vec2<float>& vec, int);
 template Vec2<float> operator/(const Vec2<float>& vec, float);
+
+template<Number T1, Number T2>
+Vec2<float> lerp(const Vec2<T1>& vec1, const Vec2<T2>& vec2, float t) {
+    return t * vec1 + (1.f - t) * vec2;
+}
+template Vec2<float> lerp(const Vec2<int>&, const Vec2<int>&, float);
+template Vec2<float> lerp(const Vec2<int>&, const Vec2<float>&, float);
+template Vec2<float> lerp(const Vec2<float>&, const Vec2<int>&, float);
+template Vec2<float> lerp(const Vec2<float>&, const Vec2<float>&, float);
 
 template struct Vec2<int>;
 template struct Vec2<float>;

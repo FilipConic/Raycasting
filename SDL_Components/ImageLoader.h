@@ -5,6 +5,7 @@
 #include <initializer_list>
 
 struct Image {
+    SDL_Surface* surface;
     SDL_Texture* texture;
     std::string name;
     int width, height;
@@ -24,7 +25,6 @@ public:
     ImageLoader(const Scene& _scene, const std::initializer_list<std::string>& image_paths);
     ~ImageLoader();
 
-    void load_image(std::string image_path);
     void load_images(const std::initializer_list<std::string>& image_paths);
     const Image& get_image(int value) const;
     const Image& get_image(const std::string& name) const;

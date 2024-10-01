@@ -6,10 +6,11 @@
 #include <string>
 
 class Scene {
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_Surface* window_surface;
     int width;
     int height;
-    SDL_Renderer* renderer;
-    SDL_Window* window;
 
 public:
     Scene(const std::string& title, int _width, int _height);

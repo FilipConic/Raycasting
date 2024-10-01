@@ -4,13 +4,16 @@ INCLUDE_PATH = -I src\include
 LIB_PATH = -L src\lib
 LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
-main.exe: main.o vec2.o color.o mouse.o keyboard.o scene.o player.o image_loader.o
+main.exe: main.o vec2.o color.o mouse.o keyboard.o scene.o player.o image_loader.o map.o
 	${GPP} ${FLAGS} $^ -o $@ ${INCLUDE_PATH} ${LIB_PATH} ${LIBS}
 
-main.o: main.cpp vec2.o color.o keyboard.o scene.o player.o image_loader.o
+main.o: main.cpp vec2.o color.o keyboard.o scene.o player.o image_loader.o map.o
 	${GPP} ${FLAGS} -c $< -o $@ ${INCLUDE_PATH} ${LIB_PATH} ${LIBS}
 
-player.o: Player.cpp scene.o image_loader.o
+player.o: Player.cpp scene.o image_loader.o map.o
+	${GPP} ${FLAGS} -c $< -o $@ ${INCLUDE_PATH} ${LIB_PATH} ${LIBS}
+
+map.o: Map.cpp scene.o image_loader.o
 	${GPP} ${FLAGS} -c $< -o $@ ${INCLUDE_PATH} ${LIB_PATH} ${LIBS}
 
 image_loader.o: SDL_Components\ImageLoader.cpp scene.o

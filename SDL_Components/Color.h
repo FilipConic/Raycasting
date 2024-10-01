@@ -7,6 +7,7 @@ struct Color {
     Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a = 255);
 
     Color& operator*=(float x);
+    Color& alpha(float x);
 };
 Color operator*(const Color& clr, float val);
 Color operator*(float val, const Color& clr);

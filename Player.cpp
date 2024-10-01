@@ -1,137 +1,33 @@
 #include "Player.h"
 
-#include <cctype>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
 #include <cassert>
-#include <cstring>
 #include <numbers>
 #include <iostream>
 #include <cmath>
+#include <cwchar>
 
 using namespace std;
 
 #define assertm(condition, msg) assert(((void)msg, condition));
 
-///////////////////////////////////////////////////////////////
-// Defininitions for the Map struct used by the Player class //
-///////////////////////////////////////////////////////////////
-
-Map::Map(const Scene& _scene, const string& file_path) : scene(_scene), width(0), height(0), cell_size(0), cells(nullptr) { read_from_map_file(file_path); }
-Map::~Map() { delete[] cells; }
-
-void Map::read_from_map_file(const string& file_path) {
-    ifstream file(file_path, ios::in);
-    assertm(file.is_open(), "Unable to open map file!\n");
-
-    stringstream stream;
-    string line, word;
-
-    auto word_to_map_color = [&word]() -> MapElement {
-        transform(word.begin(), word.end(), word.begin(), [](unsigned char c){ return std::tolower(c); });
-        if      (word == "black")      return M_BLACK;
-        else if (word == "dark_gray")  return M_DARK_GRAY;
-        else if (word == "gray")       return M_GRAY;
-        else if (word == "light_gray") return M_LIGHT_GRAY;
-        else if (word == "white")      return M_WHITE;
-        else if (word == "red")        return M_RED;
-        else if (word == "green")      return M_GREEN;
-        else if (word == "blue")       return M_BLUE;
-        else if (word == "yellow")     return M_YELLOW;
-        else if (word == "purple")     return M_PURPLE;
-        else if (word == "cyan")       return M_CYAN;
-        else if (word == "orange")     return M_ORANGE;
-        else if (word == "pink")       return M_PINK;
-        else if (word == "brick")      return M_BRICK;
-        else if (word == "gravel")     return M_GRAVEL;
-        else if (word == "cobble")     return M_COBBLE;
-        else                           return M_NONE;
-    };
-
-    int w;
-    while (getline(file, line)) {
-        w = 0;
-        stream.clear();
-        stream << line;
-        while (!stream.eof()) {
-            stream >> word;
-            ++w;
-        }
-        width = (w >= width ? w : width);
-        ++height;
-    }
-    cells = new MapElement[width * height];
-    memset(cells, 0, sizeof(MapElement) * width * height);
-
-    file.close();
-    file.open(file_path, ios::in);
-    assertm(file.is_open(), "Unable to open map file!\n");
-
-    int i, j = 0;
-    while (getline(file, line)) {
-        i = 0; 
-        stream.clear();
-        stream << line;
-        while (!stream.eof()) {
-            stream >> word;
-            cells[i++ + j * width] = word_to_map_color();
-        }
-        ++j;
-    }
-
-    file.close();
-}
-const Color& map_element_to_color(Map::MapElement m_clr) {
-    switch (m_clr) {
-    case Map::M_BLACK:      return BLACK;
-    case Map::M_DARK_GRAY:  return DARK_GRAY;
-    case Map::M_GRAY:       return GRAY;
-    case Map::M_LIGHT_GRAY: return LIGHT_GRAY;
-    case Map::M_WHITE:      return WHITE;
-    case Map::M_RED:        return RED;
-    case Map::M_GREEN:      return GREEN;
-    case Map::M_BLUE:       return BLUE;
-    case Map::M_YELLOW:     return YELLOW;
-    case Map::M_PURPLE:     return PURPLE;
-    case Map::M_CYAN:       return CYAN;
-    case Map::M_ORANGE:     return ORANGE;
-    case Map::M_PINK:       return PINK;
-    case Map::M_BRICK:      return RED;
-    case Map::M_GRAVEL:     return GRAY;
-    case Map::M_COBBLE:     return LIGHT_GRAY;
-    default:                return NO_COLOR;
-    }
-} 
-void Map::draw(int map_size, const Vec2<int>& translation_vec) {
-    cell_size = map_size / (height > width ? height : width);
-    SDL_Rect rect{translation_vec.x, translation_vec.y, width * cell_size,  height * cell_size};
-
-    scene.draw_rect(rect, WHITE);
-    rect.w = cell_size;
-    rect.h = cell_size;
-    MapElement curr_cell;
-    for (int j = 0; j < height; ++j) {
-        for (int i = 0; i < width; ++i) {
-            curr_cell = cells[i + j * width];
-            if (curr_cell)
-                scene.draw_rect(rect, map_element_to_color(curr_cell));
-            scene.draw_rect_border(rect);
-            rect.x += cell_size;
-        }
-        rect.x = translation_vec.x;
-        rect.y += cell_size;
-    }
-        
-}
+const float DOUBLE_PI = numbers::pi_v<float> * 2.f;
+const float HALF_PI = numbers::pi_v<float> / 2.f;
 
 //////////////////////////////
 // Player class definitions //
 //////////////////////////////
 
-Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map) : scene(_scene), images(_image_loader), map(_map), pos(0, 0) {}
-Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int _ray_num, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * numbers::pi_v<float> / 180.f), ray_num(_ray_num) {}
-Player::~Player() {}
+Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map) : scene(_scene), images(_image_loader), map(_map), pos(0, 0), ceiling_floor_texture(nullptr) {}
+Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int _ray_num, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * numbers::pi_v<float> / 180.f), ray_num(_ray_num) {
+    ceiling_floor_texture = SDL_CreateTexture(scene, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, scene.get_width(), scene.get_height());
+    SDL_SetTextureBlendMode(ceiling_floor_texture, SDL_BLENDMODE_BLEND);
+    void* pixels;
+    int pitch;
+    SDL_LockTexture(ceiling_floor_texture, NULL, &pixels, &pitch);
+    memset(pixels, 0, pitch * scene.get_height());
+    SDL_UnlockTexture(ceiling_floor_texture);
+}
+Player::~Player() { SDL_DestroyTexture(ceiling_floor_texture); }
 
 void Player::move(float dt, const Keyboard& keyboard) {
     Vec2<float> movement_vec{0.f, 0.f};
@@ -147,6 +43,8 @@ void Player::move(float dt, const Keyboard& keyboard) {
         curr_angle += TURN_SPEED * dt;
     if (keyboard[SDL_SCANCODE_A])
         curr_angle -= TURN_SPEED * dt;
+    if      (curr_angle > DOUBLE_PI) curr_angle = 0;
+    else if (curr_angle < 0) curr_angle = DOUBLE_PI;
     
     /////////////// cut of movement ///////////////
     Vec2<float> new_pos(pos + movement_vec);
@@ -215,7 +113,6 @@ void Player::draw(const Vec2<int>& translation_vec) {
     scene.draw_circle(translation_vec + map.cell_size * pos, map.cell_size * SIZE, GREEN);
     scene.draw_line(translation_vec + map.cell_size * pos, translation_vec + map.cell_size * (pos + n), BLUE);
 }
-const float HALF_PI = numbers::pi_v<float> / 2.f;
 void Player::draw_walls() {
     auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(7.f - x))); };
     auto brightness_fall_off = [](float x) -> float { return -x / 20.f + 1.f; };
@@ -336,8 +233,8 @@ void Player::draw_walls() {
             rect_width,
             (int)(height)
         };
-        if (curr_ray.element & 0xC0) {
-            alpha = (unsigned char)(visibility_fall_off(dist) * 255);
+        
+        if ((curr_ray.element & WALL_MASK) & 0xC0) {
             switch (curr_ray.element) {
             case Map::M_BRICK:  img = images.get_image(1); break;
             case Map::M_GRAVEL: img = images.get_image(2); break;
@@ -350,15 +247,96 @@ void Player::draw_walls() {
                 1,
                 img.height
             };
+            alpha = (unsigned char)(visibility_fall_off(dist) * 255);
             SDL_SetTextureAlphaMod(img.texture, alpha);
             SDL_RenderCopy(scene, img.texture, &image_rect, &rect);
             SDL_SetTextureAlphaMod(img.texture, 255);
+
+            color = BLACK;
+            color.alpha((1 - brightness_fall_off(dist)) * visibility_fall_off(dist));
+            scene.draw_rect(rect, color);
         } else {
-            if (abs(curr_ray.in_block_pos - 0.5f) > 0.48f) color = BLACK;
-            else color = map_element_to_color(curr_ray.element);
+            color = map_element_to_color(curr_ray.element);
             color *= brightness_fall_off(dist);
-            color.a = (unsigned char)((float)color.a * visibility_fall_off(dist));
+            color.alpha(visibility_fall_off(dist));
             scene.draw_rect(rect, color);
         }
     }
+}
+void Player::draw_floor_and_ceiling() {
+    auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(8.5f - x))); };
+    auto brightness_fall_off = [](float x) -> float { return -x / 20.f + 1.f; };
+
+    Image img = images.get_image(3);
+    Uint32* img_pixels = (Uint32*)img.surface->pixels;
+
+    const int width = scene.get_width();
+    const int height = scene.get_height();
+
+    int img_x, img_y;
+    float curr_len = 1;
+
+    Vec2<float> right = angle_to_vec(curr_angle - FOV / 2.f);
+    Vec2<float> left  = angle_to_vec(curr_angle + FOV / 2.f);
+    Vec2<float> vec, curr_left, curr_right;
+
+    int pitch;
+    void* void_pixels;
+    SDL_LockTexture(ceiling_floor_texture, NULL, &void_pixels, &pitch);
+    Uint32* pixels = (Uint32*)void_pixels;
+    memset(void_pixels, 0, pitch * height);
+
+    const float angle_inc = HALF_PI / height;
+    const int end = height * width / 2;
+    const int set_size = width / ray_num;
+    float a = HALF_PI / 2.f;
+
+    Uint32 color;
+
+    int j_floor = (height - 1) * width;
+    for (int j_ceil = 0; j_ceil <= end;) {
+        curr_len   = tan(a += angle_inc);
+        curr_left  = left  * curr_len + pos;
+        curr_right = right * curr_len + pos;
+
+        for (int i = 0; i < width; i += set_size) {
+            vec = lerp(curr_left, curr_right, (float)i / (width - 1.f));
+            if (vec.x < 0 || vec.x >= map.width || vec.y < 0 || vec.y >= map.height) continue;
+
+            img_x = img.width  * (vec.x - (int)(vec.x));
+            img_y = img.height * (vec.y - (int)(vec.y));
+
+            color = img_pixels[img_x + img_y * img.width];
+            set_rgba_alpha(color, visibility_fall_off(curr_len));
+            multiply_value_rgba(color, brightness_fall_off(curr_len));
+            for (int k = 0; k < set_size; ++k) {
+                pixels[i + k + j_floor] = color;
+                pixels[i + k + j_ceil]  = color;
+            }
+        }
+        j_ceil += width;
+        j_floor -= width;
+    }
+
+    SDL_UnlockTexture(ceiling_floor_texture);
+    SDL_RenderCopy(scene, ceiling_floor_texture, NULL, NULL);
+}
+
+Uint32 color_to_rgba(const Color& color)  {
+    #if SDL_BYTEORDER == SDL_LIL_ENDIAN
+    Uint32 result = (color.a << 24) + (color.b << 16) + (color.g << 8) + color.r;
+    #else
+    Uint32 result = (color.r << 24) + (color.g << 16) + (color.b << 8) + color.a;
+    #endif
+    return result;
+}
+void set_rgba_alpha(Uint32& color, float val) {
+    if (val > 1) val = 1;
+    else if (val < 0) val = 0;
+    color = (Uint32)((color >> 24) * val) << 24 | (color & 0xffffff);
+}
+void multiply_value_rgba(Uint32& color, float val) {
+    if (val > 1) val = 1;
+    else if (val < 0) val = 0;
+    color = (color & 0xff000000) | ((unsigned char)(((color >> 16) & 0xff) * val) << 16) | ((unsigned char)(((color >> 8) & 0xff) * val) << 8) | (unsigned char)((color& 0xff) * val);
 }

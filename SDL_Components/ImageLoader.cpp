@@ -18,43 +18,18 @@ ImageLoader::ImageLoader(const Scene& _scene, const initializer_list<string>& im
     load_images(image_paths);
 }
 ImageLoader::~ImageLoader() {
-    for (int i = 0; i < num_images; ++i) SDL_DestroyTexture(images[i].texture);
+    for (int i = 0; i < num_images; ++i) {
+        SDL_DestroyTexture(images[i].texture);
+        SDL_FreeSurface(images[i].surface);
+    }
     if (num_images) delete[] images;
 }
 
-void ImageLoader::load_image(string image_path) {
-    SDL_Surface* surface = IMG_Load(image_path.c_str());
-    assertm(surface != NULL, "Surface path looks to be wrong!\n");
-    SDL_Texture* new_texture = SDL_CreateTextureFromSurface(scene, surface);
-    assertm(new_texture != NULL, "Unable to create a texture!\n");
-    
-    Image* holder = images;
-    images = new Image[num_images + 1];
-    for (int i = 0; i < num_images; ++i)
-        images[i] = holder[i];
-    delete[] holder;
-
-    smatch matched;
-    regex_search(image_path, matched, regex("\\w+\\.png"));
-    assertm(!matched.empty(), "Unable to read image name!");
-    images[num_images].name = matched[0];
-
-    images[num_images].texture = new_texture;
-    SDL_QueryTexture(new_texture, NULL, NULL, &images[num_images].width, &images[num_images].height);
-    ++num_images;
-
-    SDL_FreeSurface(surface);
-}
 void ImageLoader::load_images(const initializer_list<string>& image_paths){
+    images = new Image[image_paths.size()];
+    
     SDL_Surface* surface;
     SDL_Texture* new_texture;
-
-    Image* holder = images;
-    images = new Image[num_images + image_paths.size()];
-    for (int i = 0; i < num_images; ++i)
-        images[i] = holder[i];
-    delete[] holder;
-    
     for (string path : image_paths) {
         surface = IMG_Load(path.c_str());
         assertm(surface != NULL, "Surface path looks to be wrong!\n");
@@ -66,11 +41,11 @@ void ImageLoader::load_images(const initializer_list<string>& image_paths){
         assertm(!matched.empty(), "Unable to read image name!");
         images[num_images].name = matched[0];
 
+        images[num_images].surface = surface;
+        SDL_LockSurface(surface);
         images[num_images].texture = new_texture;
         SDL_QueryTexture(new_texture, NULL, NULL, &images[num_images].width, &images[num_images].height);
         ++num_images;
-        
-        SDL_FreeSurface(surface);
     }
 }
 const Image& ImageLoader::get_image(int value) const {

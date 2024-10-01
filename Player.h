@@ -1,43 +1,8 @@
 #pragma once
 
-#include "SDL_Components\ImageLoader.h"
 #include "SDL_Components\Keyboard.h"
 #include "SDL_Components\Mouse.h"
-
-struct Map {
-    enum MapElement : unsigned char {
-        M_NONE = 0,
-        M_BLACK,
-        M_DARK_GRAY,
-        M_GRAY,
-        M_LIGHT_GRAY,
-        M_WHITE,
-        M_RED,
-        M_GREEN,
-        M_BLUE,
-        M_YELLOW,
-        M_PURPLE,
-        M_CYAN,
-        M_ORANGE,
-        M_PINK,
-        M_BRICK = 64,
-        M_GRAVEL,
-        M_COBBLE
-    };
-
-    const Scene& scene;
-
-    int width, height;
-    int cell_size;
-
-    MapElement* cells;
-
-    Map(const Scene& _scene, const std::string& file_path);
-    ~Map();
-
-    void read_from_map_file(const std::string& file_path);
-    void draw(int map_size, const Vec2<int>& translation_vec = {0, 0});
-};
+#include "Map.h"
 
 class Player {
     const Scene& scene;
@@ -56,6 +21,8 @@ class Player {
         Map::MapElement element;
     };
 
+    SDL_Texture* ceiling_floor_texture;
+
     const float SIZE = .45f;
     const float SPEED = 5.f;
     const float TURN_SPEED = 1.5f;
@@ -70,4 +37,9 @@ public:
     void move(float dt, const Keyboard& keyboard);
     void draw(const Vec2<int>& translation_vec = {0, 0});
     void draw_walls();
+    void draw_floor_and_ceiling();
 };
+
+Uint32 color_to_rgba(const Color& color);
+void set_rgba_alpha(Uint32& color, float val);
+void multiply_value_rgba(Uint32& color, float val);
