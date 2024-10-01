@@ -11,7 +11,7 @@ $${\color{red}[-]}$$ Connecting multiple maps<br>
 $${\color{green}[ \space X \space ]}$$ Raycasting the walls<br>
 $${\color{green}[ \space X \space ]}$$ Loading images to textures and using it to give textures to the walls<br>
 $${\color{red}[-]}$$ Better wrapper for scene objects connected to images<br>
-$${\color{red}[-]}$$ Raycasting the floors and ceilings<br>
+$${\color{green}[ \space X \space ]}$$ Raycasting the floors and ceilings<br>
 $${\color{red}[-]}$$ Add light sources<br>
 $${\color{red}[-]}$$ Depth-buffering<br>
 $${\color{red}[-]}$$ Add interactible objects<br>
