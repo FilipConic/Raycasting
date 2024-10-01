@@ -274,7 +274,7 @@ void Player::draw_walls() {
     }
 }
 void Player::draw_floor_and_ceiling() {
-    auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(9.f - x))); };
+    auto visibility_fall_off = [](float x) -> float { return 1.f - 1.f / (1.f + exp(2.5f*(10.f - x))); };
     auto brightness_fall_off = [](float x) -> float { return -x / 20.f + 1.f; };
 
     const int width = scene.get_width();
@@ -293,10 +293,9 @@ void Player::draw_floor_and_ceiling() {
     Uint32* pixels = (Uint32*)void_pixels;
     memset(void_pixels, 0, pitch * height);
 
-    const float angle_inc = HALF_PI / height;
+    const float fix_val = 2.f * cos(FOV / 2.f) - 0.05f;
     const int end = height * width / 2;
     const int set_size = width / ray_num;
-    float a = HALF_PI / 2.f;
 
     Uint32 floor_color, ceil_color;
 
@@ -304,15 +303,25 @@ void Player::draw_floor_and_ceiling() {
 
     Image img;
     Uint32* img_pixels;
+    auto get_image_from_element = [&](unsigned char el) -> void {
+        switch (el) {
+        case Map::M_BRICK:  img = images.get_image(1); break;
+        case Map::M_GRAVEL: img = images.get_image(2); break;
+        case Map::M_COBBLE: img = images.get_image(3); break;
+        default:            img = images.get_image(0); break;
+        }
+        img_pixels = (Uint32*)img.surface->pixels;
+    };
+
     unsigned floor, ceil;
     int j_floor = (height - 1) * width;
-    for (int j_ceil = 0; j_ceil <= end;) {
+    for (int j_ceil = 0; j_ceil < end;) {
         if (repeat) {
-            a += angle_inc;
             memcpy(&(pixels[j_ceil ]), &(pixels[j_ceil  - width]), pitch);
             memcpy(&(pixels[j_floor]), &(pixels[j_floor + width]), pitch);
         } else {
-            curr_len   = tan(a += angle_inc);
+            curr_len   = fix_val / (1.f - (float)j_ceil / (end));
+            //cout << j_ceil / width << " : " << curr_len << endl;
             curr_left  = left  * curr_len + pos;
             curr_right = right * curr_len + pos;
 
@@ -323,16 +332,6 @@ void Player::draw_floor_and_ceiling() {
                 floor = map.cells[(int)(vec.x) + (int)(vec.y) * map.width];
                 ceil = (floor & CEILING_MASK) >> 16;
                 (floor &= FLOOR_MASK) >>= 8;
-
-                auto get_image_from_element = [&](unsigned char el) -> void {
-                    switch (el) {
-                    case Map::M_BRICK:  img = images.get_image(1); break;
-                    case Map::M_GRAVEL: img = images.get_image(2); break;
-                    case Map::M_COBBLE: img = images.get_image(3); break;
-                    default:            img = images.get_image(0); break;
-                    }
-                    img_pixels = (Uint32*)img.surface->pixels;
-                };
                 
                 if (!floor) {
                     floor_color = 0;
