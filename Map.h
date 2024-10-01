@@ -28,18 +28,18 @@ struct Map {
     int width, height;
     int cell_size;
 
-    MapElement* cells;
+    unsigned* cells;
 
     Map(const Scene& _scene, const std::string& file_path);
     ~Map();
 
-    void read_from_map_file(const std::string& map_file_path, const std::string& floor_file_path = "", const std::string& ceiling_file_path = "");
+    void read_from_map_file(const std::string& map_file_path);
     void draw(int map_size, const Vec2<int>& translation_vec = {0, 0});
 };
 
 const Color& map_element_to_color(Map::MapElement m_clr);
 
-const unsigned WALL_MASK = 0b11111111;
+const unsigned WALL_MASK = 0xff;
 const unsigned FLOOR_MASK = WALL_MASK << 8;
 const unsigned CEILING_MASK = WALL_MASK << 16;
 

@@ -18,7 +18,7 @@ class Player {
     struct Ray {
         Vec2<float> hit_point;
         float in_block_pos;
-        Map::MapElement element;
+        unsigned element;
     };
 
     SDL_Texture* ceiling_floor_texture;
@@ -38,9 +38,9 @@ public:
     void draw(const Vec2<int>& translation_vec = {0, 0});
     void draw_walls();
     void draw_floor_and_ceiling();
-    void update();
+    void update(float dt, const Keyboard& keyboard, Mouse& mouse);
 };
 
-Uint32 color_to_rgba(const Color& color);
+Uint32 color_to_abgr(const Color& color);
 void set_rgba_alpha(Uint32& color, float val);
 void multiply_value_rgba(Uint32& color, float val);

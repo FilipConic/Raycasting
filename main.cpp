@@ -36,8 +36,7 @@ int main(int argc, char** argv) {
         k.update();
         m.update();
 
-        p.update();
-        p.move(dt, k, m);
+        p.update(dt, k, m);
 
         if (draw_map) {
             map.draw(250, translation);

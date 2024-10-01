@@ -12,14 +12,38 @@ using namespace std;
 Map::Map(const Scene& _scene, const string& file_path) : scene(_scene), width(0), height(0), cell_size(0), cells(nullptr) { read_from_map_file(file_path); }
 Map::~Map() { delete[] cells; }
 
-void Map::read_from_map_file(const string& map_file_path, const string& floor_file_path, const string& ceiling_file_path) {
+void seperate_word(const string& input, string& wall, string& floor, string& ceil) {
+    char curr = 0;
+    wall = ""; floor = ""; ceil = "";
+    for (string::const_iterator it = input.cbegin(); it != input.cend(); ++it) {
+        switch (curr) {
+        case 0: {
+            if (*it == '/' || *it == '|' || *it == '\\') { ++curr; continue; }
+            wall += *it;
+            break;
+        }
+        case 1: {
+            if (*it == '/' || *it == '|' || *it == '\\') { ++curr; continue; }
+            floor += *it;
+            break;
+        }
+        case 2: {
+            if (*it == '/' || *it == '|' || *it == '\\') { ++curr; continue; }
+            ceil += *it;
+            break;
+        }
+        default: return;
+        }
+    }
+}
+void Map::read_from_map_file(const string& map_file_path) {
     ifstream file(map_file_path, ios::in);
     assertm(file.is_open(), "Unable to open map file!\n");
 
     stringstream stream;
     string line, word;
 
-    auto word_to_map_color = [&word]() -> MapElement {
+    auto word_to_map_color = [](string& word) -> MapElement {
         transform(word.begin(), word.end(), word.begin(), [](unsigned char c){ return std::tolower(c); });
         if      (word == "black")      return M_BLACK;
         else if (word == "dark_gray")  return M_DARK_GRAY;
@@ -52,13 +76,14 @@ void Map::read_from_map_file(const string& map_file_path, const string& floor_fi
         width = (w >= width ? w : width);
         ++height;
     }
-    cells = new MapElement[width * height];
+    cells = new unsigned[width * height];
     memset(cells, 0, sizeof(MapElement) * width * height);
 
     file.close();
     file.open(map_file_path, ios::in);
     assertm(file.is_open(), "Unable to open map file!\n");
 
+    string wall, floor, ceil;
     int i, j = 0;
     while (getline(file, line)) {
         i = 0; 
@@ -66,7 +91,8 @@ void Map::read_from_map_file(const string& map_file_path, const string& floor_fi
         stream << line;
         while (!stream.eof()) {
             stream >> word;
-            cells[i++ + j * width] = word_to_map_color();
+            seperate_word(word, wall, ceil, floor);
+            cells[i++ + j * width] = word_to_map_color(wall) | (word_to_map_color(floor) << 8) | (word_to_map_color(ceil) << 16);
         }
         ++j;
     }
@@ -104,7 +130,7 @@ void Map::draw(int map_size, const Vec2<int>& translation_vec) {
     MapElement curr_cell;
     for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
-            curr_cell = cells[i + j * width];
+            curr_cell = (MapElement)(cells[i + j * width] & WALL_MASK);
             if (curr_cell)
                 scene.draw_rect(rect, map_element_to_color(curr_cell));
             scene.draw_rect_border(rect);
