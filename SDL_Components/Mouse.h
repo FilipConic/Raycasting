@@ -6,6 +6,7 @@
 struct Mouse {
     Vec2<int> pos;
     bool left, middle, right;
+    bool left_held, middle_held, right_held;
 
     Mouse();
     void update();

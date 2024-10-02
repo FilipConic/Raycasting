@@ -128,7 +128,16 @@ Vec2<T>::operator Vec2<float>() {
 }
 
 template<Number T>
-Vec2<T>& Vec2<T>::map(float(*f)(float)) {
+Vec2<T> Vec2<T>::min(const Vec2<T>& vec) {
+    return {x < vec.x ? x : vec.x, y < vec.y ? y : vec.y};
+}
+template<Number T>
+Vec2<T> Vec2<T>::max(const Vec2<T>& vec) {
+    return {x > vec.x ? x : vec.x, y > vec.y ? y : vec.y};
+}
+
+template<Number T>
+Vec2<T> Vec2<T>::map(float(*f)(float)) {
     x = f(x); y = f(y);
     return *this;
 }

@@ -30,9 +30,11 @@ struct Vec2 {
     Vec2<Type>& rotate270();
     Vec2<Type>& rotate(float a);
     template<Number T> Vec2<Type>& rotate_around(const Vec2<T>& vec, float a);
+    Vec2<Type> min(const Vec2<Type>& vec);
+    Vec2<Type> max(const Vec2<Type>& vec);
     operator Vec2<int>();
     operator Vec2<float>();
-    Vec2<Type>& map(float(*f)(float));
+    Vec2<Type> map(float(*f)(float));
 };
 
 template<Number T1, Number T2>

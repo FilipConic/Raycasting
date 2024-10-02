@@ -17,6 +17,7 @@ class Player {
     int num_pixels, ray_num;
     struct Ray {
         Vec2<float> hit_point;
+        char hit_side;
         float in_block_pos;
         unsigned element;
     };

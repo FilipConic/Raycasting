@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     ".\\images\\glitch_texture.png",
     ".\\images\\bricks.png",
     ".\\images\\gravel.png",
-    ".\\images\\cobble_path.png"
+    ".\\images\\cobble_path.png",
     });
 
     il.load_image(".\\images\\music_note.png");

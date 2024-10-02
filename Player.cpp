@@ -10,15 +10,16 @@ using namespace std;
 
 #define assertm(condition, msg) assert(((void)msg, condition));
 
-const float DOUBLE_PI = numbers::pi_v<float> * 2.f;
-const float HALF_PI = numbers::pi_v<float> / 2.f;
+const float PI = numbers::pi_v<float>;
+const float DOUBLE_PI = PI * 2.f;
+const float HALF_PI = PI / 2.f;
 
 //////////////////////////////
 // Player class definitions //
 //////////////////////////////
 
 Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map) : scene(_scene), images(_image_loader), map(_map), pos(0, 0), ceiling_floor_texture(nullptr) {}
-Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int pixelation, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * numbers::pi_v<float> / 180.f), num_pixels(pixelation), ray_num(scene.get_width() / pixelation) {
+Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int pixelation, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * PI / 180.f), num_pixels(pixelation), ray_num(scene.get_width() / pixelation) {
     ceiling_floor_texture = SDL_CreateTexture(scene, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, scene.get_width(), scene.get_height());
     SDL_SetTextureBlendMode(ceiling_floor_texture, SDL_BLENDMODE_BLEND);
     void* pixels;
@@ -55,22 +56,17 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
     else if (curr_angle < 0) curr_angle += DOUBLE_PI;
     
     /////////////// cut of movement ///////////////
-    if (abs(movement_vec.x) > 1e-2 && abs(movement_vec.y) > 1e-2) movement_vec.normalize() *= speed;
-    Vec2<float> new_pos(pos + movement_vec);
-    if (new_pos.x > map.width)  new_pos.x = map.width;
-    else if (new_pos.x < 0)     new_pos.x = 0;
-    if (new_pos.y > map.height) new_pos.y = map.height;
-    else if (new_pos.y < 0)     new_pos.y = 0;
-    Vec2<int> new_pos_int(new_pos);
-    Vec2<int> top_left     = map_vec(pos, [](float x)->float{return floor(x - 0.45);});
-    Vec2<int> bottom_right = map_vec(pos, [](float x)->float{return floor(x + 0.45);});
+    if (movement_vec.magnitude_squared() > 0) movement_vec.normalize() *= speed;
+
+    Vec2<float> new_pos    = pos + movement_vec;    
+    Vec2<int> new_pos_int  = new_pos;
+    Vec2<int> top_left     = map_vec(pos, [](float x)->float{return floor(x - 0.5);}).max({0, 0});
+    Vec2<int> bottom_right = map_vec(pos, [](float x)->float{return floor(x + 0.5);}).min({map.width - 1.f, map.height - 1.f});
 
     auto magn = [](float x, float y) -> float { return x * x + y * y; };
     float size_squared = SIZE * SIZE - 0.05f;
     if (movement_vec.x > 0) {
-        if (bottom_right.x >= map.width) {
-            movement_vec.x = 0.f;
-        } else if (map.cells[bottom_right.x + new_pos_int.y * map.width] & WALL_MASK) {
+        if (map.cells[bottom_right.x + new_pos_int.y * map.width] & WALL_MASK) {
             movement_vec.x = 0.f;
         } else if (map.cells[bottom_right.x + top_left.y * map.width] & WALL_MASK) {
             if (magn(pos.x - bottom_right.x, pos.y - new_pos_int.y) < size_squared) movement_vec.x = 0.f;
@@ -78,9 +74,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
             if (magn(pos.x - bottom_right.x, pos.y - bottom_right.y) < size_squared) movement_vec.x = 0.f;
         }
     } else if (movement_vec.x <= 0) {
-        if (top_left.x < 0) {
-            movement_vec.x = 0.f;
-        } else if (map.cells[top_left.x + new_pos_int.y * map.width] & WALL_MASK) {
+        if (map.cells[top_left.x + new_pos_int.y * map.width] & WALL_MASK) {
             movement_vec.x = 0.f;
         } else if (map.cells[top_left.x + top_left.y * map.width] & WALL_MASK) {
             if (magn(pos.x - new_pos_int.x, pos.y - new_pos_int.y) < size_squared) movement_vec.x = 0.f; 
@@ -89,9 +83,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
         }
     }
     if (movement_vec.y > 0) {
-        if (bottom_right.y > map.height) {
-            movement_vec.y = 0.f;
-        } else if (map.cells[new_pos_int.x + bottom_right.y * map.width] & WALL_MASK) {
+        if (map.cells[new_pos_int.x + bottom_right.y * map.width] & WALL_MASK) {
             movement_vec.y = 0.f;
         } else if (map.cells[top_left.x + bottom_right.y * map.width] & WALL_MASK) {
             if (magn(pos.x - new_pos_int.x, pos.y - bottom_right.y) < size_squared) movement_vec.y = 0.f;
@@ -99,9 +91,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
             if (magn(pos.x - bottom_right.x, pos.y - bottom_right.y) < size_squared) movement_vec.y = 0.f;
         }
     } else if (movement_vec.y <= 0) {
-        if (top_left.y < 0) {
-            movement_vec.y = 0.f;
-        } else if (map.cells[new_pos_int.x + top_left.y * map.width] & WALL_MASK) {
+        if (map.cells[new_pos_int.x + top_left.y * map.width] & WALL_MASK) {
             movement_vec.y = 0.f;
         } else if (map.cells[top_left.x + top_left.y * map.width] & WALL_MASK) {
             if (magn(pos.x - new_pos_int.x, pos.y - new_pos_int.y) < size_squared) movement_vec.y = 0.f;
@@ -111,10 +101,46 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
     }
     ///////////////////////////////////////////////////////////////////
 
-    movement_vec.x = max(min(movement_vec.x, speed), -speed);
-    movement_vec.y = max(min(movement_vec.y, speed), -speed);
+    pos += movement_vec.min({speed, speed}).max({-speed, -speed});
+    pos = pos.max({SIZE, SIZE}).min({map.width - SIZE, map.height - SIZE});
 
-    pos += movement_vec;
+    if (mouse.left && !mouse.left_held) {
+        int ix = (int)pos.x;
+        int iy = (int)pos.y;
+        if ((15.f * HALF_PI / 4.f < curr_angle && curr_angle <= DOUBLE_PI) || (0 < curr_angle && curr_angle <= HALF_PI / 4.f)) {
+            if (pos.x < map.width - 2) {
+                if (!(map.cells[ix + 1 + iy * map.width] & WALL_MASK) && (map.cells[ix + 2 + iy * map.width] & WALL_MASK)) {
+                    map.cells[ix + 1 + iy * map.width] ^= map.cells[ix + 2 + iy * map.width];
+                    map.cells[ix + 2 + iy * map.width] ^= map.cells[ix + 1 + iy * map.width];
+                    map.cells[ix + 1 + iy * map.width] ^= map.cells[ix + 2 + iy * map.width];
+                }
+            }
+        } else if (3.f * HALF_PI / 4.f < curr_angle && curr_angle <= 5.f * HALF_PI / 4.f) {
+            if (pos.y < map.height - 2) {
+                if (!(map.cells[ix + (iy + 1) * map.width] & WALL_MASK) && (map.cells[ix + (iy + 2) * map.width] & WALL_MASK)) {
+                    map.cells[ix + (iy + 1) * map.width] ^= map.cells[ix + (iy + 2) * map.width];
+                    map.cells[ix + (iy + 2) * map.width] ^= map.cells[ix + (iy + 1) * map.width];
+                    map.cells[ix + (iy + 1) * map.width] ^= map.cells[ix + (iy + 2) * map.width];
+                }
+            }
+        } else if (7.f * HALF_PI / 4.f < curr_angle && curr_angle <= 9.f * HALF_PI / 4.f) {
+            if (pos.x > 2) {
+                if (!(map.cells[ix - 1 + iy * map.width] & WALL_MASK) && (map.cells[ix - 2 + iy * map.width] & WALL_MASK)) {
+                    map.cells[ix - 1 + iy * map.width] ^= map.cells[ix - 2 + iy * map.width];
+                    map.cells[ix - 2 + iy * map.width] ^= map.cells[ix - 1 + iy * map.width];
+                    map.cells[ix - 1 + iy * map.width] ^= map.cells[ix - 2 + iy * map.width];
+                }
+            }
+        } else if (11.f * HALF_PI / 4.f < curr_angle && curr_angle <= 13.f * HALF_PI / 4.f) {
+            if (pos.y > 2) {
+                if (!(map.cells[ix + (iy - 1) * map.width] & WALL_MASK) && (map.cells[ix + (iy - 2) * map.width] & WALL_MASK)) {
+                    map.cells[ix + (iy - 1) * map.width] ^= map.cells[ix + (iy - 2) * map.width];
+                    map.cells[ix + (iy - 2) * map.width] ^= map.cells[ix + (iy - 1) * map.width];
+                    map.cells[ix + (iy - 1) * map.width] ^= map.cells[ix + (iy - 2) * map.width];
+                }
+            }
+        }
+    }
 }
 void Player::draw(const Vec2<int>& translation_vec) {
     scene.draw_circle(translation_vec + map.cell_size * pos, map.cell_size * SIZE, GREEN);
@@ -142,7 +168,7 @@ void Player::draw_walls() {
         hit_x.y = pos.y + (hit_x.x - pos.x) * dy;
 
         if (y_side) hit_y.y =  ceil(pos.y);
-        else        hit_y.y = floor(pos.y);               
+        else        hit_y.y = floor(pos.y);    
         hit_y.x = pos.x + (hit_y.y - pos.y) * dx;
 
         off_the_map = false;
@@ -202,6 +228,7 @@ void Player::draw_walls() {
         }
         ray.in_block_pos = curr_is_x ? hit_x.y - floor(hit_x.y) : hit_y.x - floor(hit_y.x); 
         ray.hit_point = curr_is_x ? hit_x - pos : hit_y - pos;
+        ray.hit_side = curr_is_x ? (x_side ? 0 : 1) : (y_side ? 2 : 3);
         ray.element = hit_color;
     };
 
@@ -248,7 +275,7 @@ void Player::draw_walls() {
             default:            img = images.get_image(0); break;
             }
             image_rect = {
-                (int)(curr_ray.in_block_pos * img.width),
+                curr_ray.hit_side == 1 || curr_ray.hit_side == 2 ? (int)(curr_ray.in_block_pos * img.width) : (int)((1 - curr_ray.in_block_pos) * img.width),
                 0,
                 1,
                 img.height
@@ -279,7 +306,6 @@ void Player::draw_floor_and_ceiling() {
     int img_x, img_y;
     float curr_len = 1;
 
-    Vec2<float> right = angle_to_vec(curr_angle + FOV / 2.f);
     Vec2<float> left  = angle_to_vec(curr_angle - FOV / 2.f);
     Vec2<float> vec, curr_left, curr_right;
 
@@ -289,7 +315,7 @@ void Player::draw_floor_and_ceiling() {
     Uint32* pixels = (Uint32*)void_pixels;
     memset(void_pixels, 0, pitch * height);
 
-    const float fix_val = 2.f * cos(FOV / 2.f) - 0.025f;
+    const float fix_val = 2.f * cos(FOV / 2.f) - .03f;
     const int end = height * width / 2;
 
     Uint32 floor_color, ceil_color;
@@ -308,7 +334,7 @@ void Player::draw_floor_and_ceiling() {
         img_pixels = (Uint32*)img.surface->pixels;
     };
 
-    unsigned floor, ceil;
+    unsigned map_floor, map_ceil;
     int j_floor = (height - 1) * width;
     for (int j_ceil = 0; j_ceil < end;) {
         if (repeat) {
@@ -316,47 +342,46 @@ void Player::draw_floor_and_ceiling() {
             memcpy(&(pixels[j_floor]), &(pixels[j_floor + width]), pitch);
         } else {
             curr_len   = fix_val / (1.f - (float)j_ceil / (end));
-            //cout << j_ceil / width << " : " << curr_len << endl;
-            curr_left  = left  * curr_len + pos;
-            curr_right = right * curr_len + pos;
+            curr_left  = left * curr_len;
+            (curr_right = curr_left).rotate(FOV);
 
             for (int i = 0; i < width; i += num_pixels) {
-                vec = lerp(curr_right, curr_left, (float)i / (width - 1.f));
+                vec = lerp(curr_right, curr_left, (float)i / (width - 1.f)) + pos;
                 if (vec.x < 0 || vec.x >= map.width || vec.y < 0 || vec.y >= map.height) continue;
                 
-                floor = map.cells[(int)(vec.x) + (int)(vec.y) * map.width];
-                ceil = (floor & CEILING_MASK) >> 16;
-                (floor &= FLOOR_MASK) >>= 8;
+                map_floor = map.cells[(int)(vec.x) + (int)(vec.y) * map.width];
+                map_ceil = (map_floor & CEILING_MASK) >> 16;
+                (map_floor &= FLOOR_MASK) >>= 8;
                 
-                if (!floor) {
+                if (!map_floor) {
                     floor_color = 0;
-                } else if (floor & 0xC0) {
-                    get_image_from_element(floor);
-                    img_x = img.width  * (vec.x - (int)(vec.x));
-                    img_y = img.height * (vec.y - (int)(vec.y));
+                } else if (map_floor & 0xC0) {
+                    get_image_from_element(map_floor);
+                    img_x = img.width  * (vec.x - floor(vec.x));
+                    img_y = img.height * (vec.y - floor(vec.y));
 
-                    floor_color = img_pixels[img_x + img_y * img.width];
+                    floor_color = img_pixels[img_x + img_y * img.surface->w];
                 } else {
-                    floor_color = color_to_abgr(map_element_to_color((Map::MapElement)floor));
+                    floor_color = color_to_abgr(map_element_to_color((Map::MapElement)map_floor));
                 }
 
-                if (!ceil) {
+                if (!map_ceil) {
                     ceil_color = 0;
-                } else if (ceil & 0xC0) {
-                    get_image_from_element(ceil);
-                    img_x = img.width  * (vec.x - (int)(vec.x));
-                    img_y = img.height * (vec.y - (int)(vec.y));
+                } else if (map_ceil & 0xC0) {
+                    get_image_from_element(map_ceil);
+                    img_x = img.width  * (vec.x - floor(vec.x));
+                    img_y = img.height * (vec.y - floor(vec.y));
 
                     ceil_color = img_pixels[img_x + img_y * img.width];
-                } else if (ceil) {
-                    ceil_color = color_to_abgr(map_element_to_color((Map::MapElement)ceil));
+                } else {
+                    ceil_color = color_to_abgr(map_element_to_color((Map::MapElement)map_ceil));
                 }
 
-                if (floor) {
+                if (map_floor) {
                     set_rgba_alpha(floor_color, visibility_fall_off(curr_len));
                     multiply_value_rgba(floor_color, brightness_fall_off(curr_len));
                 }
-                if (ceil) {
+                if (map_ceil) {
                     set_rgba_alpha(ceil_color, visibility_fall_off(curr_len));
                     multiply_value_rgba(ceil_color, brightness_fall_off(curr_len));
                 }
