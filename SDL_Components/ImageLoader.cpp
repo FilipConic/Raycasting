@@ -25,8 +25,33 @@ ImageLoader::~ImageLoader() {
     if (num_images) delete[] images;
 }
 
+void ImageLoader::load_image(const string& image_path) {
+    Image* holder = images;
+    images = new Image[num_images + 1];
+    for (int i = 0; i < num_images; ++i) images[i] = holder[i];
+    delete[] holder;
+
+    SDL_Surface* surface = IMG_Load(image_path.c_str());
+    assertm(surface != NULL, "Surface path looks to be wrong!\n");
+    SDL_Texture* new_texture = SDL_CreateTextureFromSurface(scene, surface);
+    assertm(new_texture != NULL, "Unable to create a texture!\n");
+
+    smatch matched;
+    regex_search(image_path, matched, regex("\\w+\\.png"));
+    assertm(!matched.empty(), "Unable to read image name!");
+    images[num_images].name = matched[0];
+
+    images[num_images].surface = surface;
+    SDL_LockSurface(surface);
+    images[num_images].texture = new_texture;
+    SDL_QueryTexture(new_texture, NULL, NULL, &images[num_images].width, &images[num_images].height);
+    ++num_images;
+}
 void ImageLoader::load_images(const initializer_list<string>& image_paths){
-    images = new Image[image_paths.size()];
+    Image* holder = images;
+    images = new Image[num_images + image_paths.size()];
+    for (int i = 0; i < num_images; ++i) images[i] = holder[i];
+    delete[] holder;
     
     SDL_Surface* surface;
     SDL_Texture* new_texture;

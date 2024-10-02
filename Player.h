@@ -14,7 +14,7 @@ class Player {
     float FOV;
     Vec2<float> n;
 
-    int ray_num;
+    int num_pixels, ray_num;
     struct Ray {
         Vec2<float> hit_point;
         float in_block_pos;
@@ -31,7 +31,7 @@ class Player {
     Player(const Player&) = delete;
 public:
     Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map);
-    Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int ray_num = 100, int FOV = 90);
+    Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int pixelation = 8, int FOV = 90);
     ~Player();
 
     void move(float dt, const Keyboard& keyboard, Mouse& mouse);

@@ -12,13 +12,14 @@ $${\color{green}[ \space X \space ]}$$ Raycasting the walls<br>
 $${\color{green}[ \space X \space ]}$$ Loading images to textures and using it to give textures to the walls<br>
 $${\color{red}[-]}$$ Better wrapper for scene objects connected to images<br>
 $${\color{green}[ \space X \space ]}$$ Raycasting the floors and ceilings<br>
-$${\color{red}[-]}$$ Add light sources<br>
 $${\color{red}[-]}$$ Depth-buffering<br>
+$${\color{red}[-]}$$ Create a level editor<br>
 $${\color{red}[-]}$$ Add interactible objects<br>
+$${\color{red}[-]}$$ Add enemies<br>
 $${\color{red}[-]}$$ Add a player inventory<br>
 $${\color{red}[-]}$$ Add a hotbar and render what the player is holding<br>
 $${\color{red}[-]}$$ Improving player movement<br>
-$${\color{red}[-]}$$ Add enemies<br>
+$${\color{red}[-]}$$ Add light sources<br>
 $${\color{red}[-]}$$ Add animated textures support<br>
 
 This project uses *SDL2* and *SDL2_image* libraries. All dependecies are included in the repository.<br>

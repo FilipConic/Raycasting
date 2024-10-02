@@ -13,4 +13,5 @@ brick  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ora
 brick  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  green//  /green/green  /green/green  /green/green green//
 brick  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  blue//  /blue/blue  /blue/blue  /blue/blue blue//
 brick  //red  //orange  //yellow  //green  //blue  //pink  //purple  #####  #####  #####  pink//  /pink/pink  /pink/pink  /pink/pink pink//
-brick  red    orange yellow green  blue   pink   purple brick  brick  brick  purple//  /purple/purple  /purple/purple  /purple/purple  purple//
+brick  red    orange yellow green  blue   pink   purple brick  #  brick  purple//  /purple/purple  /purple/purple  /purple/purple  purple//
+brick # # # # # # # # # # # # # # brick

@@ -128,7 +128,7 @@ Vec2<T>::operator Vec2<float>() {
 }
 
 template<Number T>
-Vec2<T>& Vec2<T>::map(FtoF f) {
+Vec2<T>& Vec2<T>::map(float(*f)(float)) {
     x = f(x); y = f(y);
     return *this;
 }
@@ -196,6 +196,13 @@ template Vec2<float> lerp(const Vec2<int>&, const Vec2<int>&, float);
 template Vec2<float> lerp(const Vec2<int>&, const Vec2<float>&, float);
 template Vec2<float> lerp(const Vec2<float>&, const Vec2<int>&, float);
 template Vec2<float> lerp(const Vec2<float>&, const Vec2<float>&, float);
+
+template<Number T>
+Vec2<float> map_vec(const Vec2<T>& vec, float(*f)(float)) {
+    return {f(vec.x), f(vec.y)};
+}
+template Vec2<float> map_vec(const Vec2<int>&, float(*f)(float));
+template Vec2<float> map_vec(const Vec2<float>&, float(*f)(float));
 
 template struct Vec2<int>;
 template struct Vec2<float>;

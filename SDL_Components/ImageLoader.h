@@ -12,7 +12,6 @@ struct Image {
 };
 
 class ImageLoader {
-
     const Scene& scene;
 
     Image* images;
@@ -25,6 +24,7 @@ public:
     ImageLoader(const Scene& _scene, const std::initializer_list<std::string>& image_paths);
     ~ImageLoader();
 
+    void load_image(const std::string& image_path);
     void load_images(const std::initializer_list<std::string>& image_paths);
     const Image& get_image(int value) const;
     const Image& get_image(const std::string& name) const;

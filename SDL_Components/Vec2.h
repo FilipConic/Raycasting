@@ -32,8 +32,7 @@ struct Vec2 {
     template<Number T> Vec2<Type>& rotate_around(const Vec2<T>& vec, float a);
     operator Vec2<int>();
     operator Vec2<float>();
-    typedef float(*FtoF)(float);
-    Vec2<Type>& map(FtoF f);
+    Vec2<Type>& map(float(*f)(float));
 };
 
 template<Number T1, Number T2>
@@ -51,6 +50,8 @@ Vec2<T2> operator/(const Vec2<T1>& vec, T2 a);
 
 template<Number T1, Number T2>
 Vec2<float> lerp(const Vec2<T1>& vec1, const Vec2<T2>& vec2, float t);
+template <Number T>
+Vec2<float> map_vec(const Vec2<T>& vec, float(*f)(float));
 
 Vec2<int> vec_floor(const Vec2<float>& vec);
 Vec2<int> vec_ceil(const Vec2<float>& vec);

@@ -18,10 +18,12 @@ int main(int argc, char** argv) {
     ".\\images\\gravel.png",
     ".\\images\\cobble_path.png"
     });
+
+    il.load_image(".\\images\\music_note.png");
     
     Vec2<int> translation = {50, 50};
     Map map(s, "map.txt");
-    Player p(s, il, map, 9.5f, 6.5f, 200, 90);
+    Player p(s, il, map, 9.5f, 6.5f);
 
     SDL_Event e;
     Uint64 last_ticks, time_passed = SDL_GetTicks64();

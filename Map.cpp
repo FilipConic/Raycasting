@@ -77,7 +77,7 @@ void Map::read_from_map_file(const string& map_file_path) {
         ++height;
     }
     cells = new unsigned[width * height];
-    memset(cells, 0, sizeof(MapElement) * width * height);
+    memset(cells, 0, sizeof(unsigned) * width * height);
 
     file.close();
     file.open(map_file_path, ios::in);

@@ -18,7 +18,7 @@ const float HALF_PI = numbers::pi_v<float> / 2.f;
 //////////////////////////////
 
 Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map) : scene(_scene), images(_image_loader), map(_map), pos(0, 0), ceiling_floor_texture(nullptr) {}
-Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int _ray_num, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * numbers::pi_v<float> / 180.f), ray_num(_ray_num) {
+Player::Player(const Scene& _scene, const ImageLoader& _image_loader, const Map& _map, float _x, float _y, int pixelation, int _FOV) : scene(_scene), images(_image_loader), map(_map), pos(_x, _y), curr_angle(0), FOV(_FOV * numbers::pi_v<float> / 180.f), num_pixels(pixelation), ray_num(scene.get_width() / pixelation) {
     ceiling_floor_texture = SDL_CreateTexture(scene, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, scene.get_width(), scene.get_height());
     SDL_SetTextureBlendMode(ceiling_floor_texture, SDL_BLENDMODE_BLEND);
     void* pixels;
@@ -62,12 +62,8 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
     if (new_pos.y > map.height) new_pos.y = map.height;
     else if (new_pos.y < 0)     new_pos.y = 0;
     Vec2<int> new_pos_int(new_pos);
-    Vec2<int> top_left    {(int)(pos.x - SIZE), (int)(pos.y - SIZE)};
-    if (top_left.x < 0) top_left.x = 0;
-    if (top_left.y < 0) top_left.y = 0;
-    Vec2<int> bottom_right{(int)(pos.x + SIZE), (int)(pos.y + SIZE)};
-    if (bottom_right.x > map.width) bottom_right.x = map.width;
-    if (bottom_right.y > map.height) bottom_right.y = map.height;
+    Vec2<int> top_left     = map_vec(pos, [](float x)->float{return floor(x - 0.45);});
+    Vec2<int> bottom_right = map_vec(pos, [](float x)->float{return floor(x + 0.45);});
 
     auto magn = [](float x, float y) -> float { return x * x + y * y; };
     float size_squared = SIZE * SIZE - 0.05f;
@@ -81,7 +77,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
         } else if (map.cells[bottom_right.x + bottom_right.y * map.width] & WALL_MASK) {
             if (magn(pos.x - bottom_right.x, pos.y - bottom_right.y) < size_squared) movement_vec.x = 0.f;
         }
-    } else if (movement_vec.x < 0) {
+    } else if (movement_vec.x <= 0) {
         if (top_left.x < 0) {
             movement_vec.x = 0.f;
         } else if (map.cells[top_left.x + new_pos_int.y * map.width] & WALL_MASK) {
@@ -93,7 +89,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
         }
     }
     if (movement_vec.y > 0) {
-        if (bottom_right.y >= map.height) {
+        if (bottom_right.y > map.height) {
             movement_vec.y = 0.f;
         } else if (map.cells[new_pos_int.x + bottom_right.y * map.width] & WALL_MASK) {
             movement_vec.y = 0.f;
@@ -102,7 +98,7 @@ void Player::move(float dt, const Keyboard& keyboard, Mouse& mouse) {
         } else if (map.cells[bottom_right.x + bottom_right.y * map.width] & WALL_MASK) {
             if (magn(pos.x - bottom_right.x, pos.y - bottom_right.y) < size_squared) movement_vec.y = 0.f;
         }
-    } else if (movement_vec.y < 0) {
+    } else if (movement_vec.y <= 0) {
         if (top_left.y < 0) {
             movement_vec.y = 0.f;
         } else if (map.cells[new_pos_int.x + top_left.y * map.width] & WALL_MASK) {
@@ -293,9 +289,8 @@ void Player::draw_floor_and_ceiling() {
     Uint32* pixels = (Uint32*)void_pixels;
     memset(void_pixels, 0, pitch * height);
 
-    const float fix_val = 2.f * cos(FOV / 2.f) - 0.05f;
+    const float fix_val = 2.f * cos(FOV / 2.f) - 0.025f;
     const int end = height * width / 2;
-    const int set_size = width / ray_num;
 
     Uint32 floor_color, ceil_color;
 
@@ -325,7 +320,7 @@ void Player::draw_floor_and_ceiling() {
             curr_left  = left  * curr_len + pos;
             curr_right = right * curr_len + pos;
 
-            for (int i = 0; i < width; i += set_size) {
+            for (int i = 0; i < width; i += num_pixels) {
                 vec = lerp(curr_right, curr_left, (float)i / (width - 1.f));
                 if (vec.x < 0 || vec.x >= map.width || vec.y < 0 || vec.y >= map.height) continue;
                 
@@ -366,7 +361,7 @@ void Player::draw_floor_and_ceiling() {
                     multiply_value_rgba(ceil_color, brightness_fall_off(curr_len));
                 }
 
-                for (int k = 0; k < set_size; ++k) {
+                for (int k = 0; k < num_pixels; ++k) {
                     pixels[i + k + j_floor] = floor_color;
                     pixels[i + k + j_ceil]  = ceil_color;
                 }
